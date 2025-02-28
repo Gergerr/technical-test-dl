@@ -1,0 +1,8 @@
+google-cloud-storage
+google-cloud-aiplatform
+pandas
+matplotlib
+streamlit
+gradio
+dvc
+mlflow
