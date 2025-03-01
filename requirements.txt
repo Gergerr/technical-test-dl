@@ -7,3 +7,4 @@ gradio
 dvc
 mlflow
 chromadb
+db-dtypes

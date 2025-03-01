@@ -11945,3 +11945,8 @@ Informasi ini dapat ditemukan dalam kalimat:
 [2025-03-02 00:58:06,955: WARNING: local_persistent_hnsw: Add of existing embedding ID: doc_5869]
 [2025-03-02 00:58:06,958: INFO: data_ingestion: Vector store created/updated and persisted in vector_store_temp/]
 [2025-03-02 00:58:22,315: INFO: data_ingestion: Vector store uploaded to technical-test-datalabs/vector_store/]
+[2025-03-02 01:02:00,731: ERROR: preprocess: Error in data preprocessing: Please install the 'db-dtypes' package to use this function.]
+[2025-03-02 01:02:38,699: INFO: preprocess: Loaded data from BigQuery: ask_data_dataset.superstore_data]
+[2025-03-02 01:02:38,700: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5870. Total order_id unik: 3414.]
+[2025-03-02 01:02:42,260: INFO: posthog: Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.]
+[2025-03-02 01:02:50,802: INFO: preprocess: LLM response for query 'Berapa jumlah order_id unik dalam dataset ini?': Untuk menjawab pertanyaan Anda, saya telah meninjau seluruh dataset yang Anda sediakan dan menemukan jawabannya. Jumlah order_id unik dalam dataset ini sebanyak 3414. Harap perhatikan bahwa, jumlah order_id unik tidak sama dengan jumlah baris, karena order_id dapat muncul lebih dari sekali dalam dataset.]
