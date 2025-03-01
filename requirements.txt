@@ -6,3 +6,4 @@ streamlit
 gradio
 dvc
 mlflow
+chromadb

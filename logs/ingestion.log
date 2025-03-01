@@ -1,0 +1,156 @@
+[2025-02-28 18:27:40,925: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 1 of 3. Reason: timed out]
+[2025-02-28 18:27:44,907: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 2 of 3. Reason: timed out]
+[2025-02-28 18:27:49,920: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 3 of 3. Reason: timed out]
+[2025-02-28 18:27:49,921: WARNING: _default: Authentication failed using Compute Engine authentication due to unavailable metadata server.]
+[2025-02-28 18:27:49,921: ERROR: data_ingestion: Error in data ingestion: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.]
+[2025-02-28 19:10:25,182: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 1 of 3. Reason: timed out]
+[2025-02-28 19:10:29,264: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 2 of 3. Reason: timed out]
+[2025-02-28 19:10:34,313: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 3 of 3. Reason: timed out]
+[2025-02-28 19:10:34,314: WARNING: _default: Authentication failed using Compute Engine authentication due to unavailable metadata server.]
+[2025-02-28 19:10:34,314: ERROR: data_ingestion: Error in data ingestion: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.]
+[2025-02-28 19:12:32,190: ERROR: data_ingestion: Error in data ingestion: File /Users/geraldo/Documents/Code/MLOps/datalabs-techtest/askdata/service-account.json was not found.]
+[2025-02-28 19:12:51,618: INFO: data_ingestion: Data CSV downloaded from technical-test-datalabs/ASK DATA - superstore_data.csv to data/processed_data.csv]
+[2025-02-28 19:12:51,649: INFO: data_ingestion: Loaded data with columns: Index(['order_id', 'gmv', 'profit', 'quantity', 'category', 'sub_category',
+       'cost', 'total_gmv', 'total_cost', 'total_profit', 'order_date',
+       'customer_name', 'city', 'country', 'region', 'segment', 'ship_date',
+       'ship_mode', 'lon', 'lat'],
+      dtype='object')]
+[2025-02-28 22:59:08,986: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 1 of 3. Reason: timed out]
+[2025-02-28 22:59:13,079: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 2 of 3. Reason: timed out]
+[2025-02-28 22:59:18,281: WARNING: _metadata: Compute Engine Metadata server unavailable on attempt 3 of 3. Reason: timed out]
+[2025-02-28 22:59:18,284: WARNING: _default: Authentication failed using Compute Engine authentication due to unavailable metadata server.]
+[2025-02-28 22:59:18,285: ERROR: 418436846: Error in data ingestion: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.]
+[2025-03-01 07:24:37,330: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 07:24:37,866: ERROR: preprocess: Error in LLM integration: 403 Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. [reason: "SERVICE_DISABLED"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "aiplatform.googleapis.com"
+}
+metadata {
+  key: "serviceTitle"
+  value: "Vertex AI API"
+}
+metadata {
+  key: "containerInfo"
+  value: "datalabs-test"
+}
+metadata {
+  key: "consumer"
+  value: "projects/datalabs-test"
+}
+metadata {
+  key: "activationUrl"
+  value: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+, locale: "en-US"
+message: "Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."
+, links {
+  description: "Google developers console API activation"
+  url: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+]]
+[2025-03-01 07:39:18,379: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 07:39:19,875: ERROR: preprocess: Error in LLM integration: 403 Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. [reason: "SERVICE_DISABLED"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "aiplatform.googleapis.com"
+}
+metadata {
+  key: "serviceTitle"
+  value: "Vertex AI API"
+}
+metadata {
+  key: "containerInfo"
+  value: "datalabs-test"
+}
+metadata {
+  key: "consumer"
+  value: "projects/datalabs-test"
+}
+metadata {
+  key: "activationUrl"
+  value: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+, locale: "en-US"
+message: "Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."
+, links {
+  description: "Google developers console API activation"
+  url: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+]]
+[2025-03-01 21:33:54,626: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 21:33:56,230: ERROR: preprocess: Error in LLM integration: 403 Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. [reason: "SERVICE_DISABLED"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "aiplatform.googleapis.com"
+}
+metadata {
+  key: "serviceTitle"
+  value: "Vertex AI API"
+}
+metadata {
+  key: "containerInfo"
+  value: "datalabs-test"
+}
+metadata {
+  key: "consumer"
+  value: "projects/datalabs-test"
+}
+metadata {
+  key: "activationUrl"
+  value: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+, locale: "en-US"
+message: "Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."
+, links {
+  description: "Google developers console API activation"
+  url: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+]]
+[2025-03-01 21:36:50,127: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 21:36:51,669: ERROR: preprocess: Error in LLM integration: 403 Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. [reason: "SERVICE_DISABLED"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "aiplatform.googleapis.com"
+}
+metadata {
+  key: "serviceTitle"
+  value: "Vertex AI API"
+}
+metadata {
+  key: "containerInfo"
+  value: "datalabs-test"
+}
+metadata {
+  key: "consumer"
+  value: "projects/datalabs-test"
+}
+metadata {
+  key: "activationUrl"
+  value: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+, locale: "en-US"
+message: "Vertex AI API has not been used in project datalabs-test before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry."
+, links {
+  description: "Google developers console API activation"
+  url: "https://console.developers.google.com/apis/api/aiplatform.googleapis.com/overview?project=datalabs-test"
+}
+]]
+[2025-03-01 21:46:47,669: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 21:46:49,154: ERROR: preprocess: Error in LLM integration: 404 The Model does not exist.]
+[2025-03-01 22:02:46,996: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 22:02:47,032: ERROR: preprocess: Error in LLM integration: 'GenerativeModel' object has no attribute 'predict']
+[2025-03-01 22:03:47,665: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 22:03:50,574: INFO: preprocess: LLM response for query 'Berapa jumlah order_id unik dalam dataset ini?': Berdasarkan informasi yang Anda berikan, dataset ini memiliki total order_id unik sebanyak 3414. 
+
+Informasi ini dapat ditemukan dalam kalimat: 
+
+> Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414. 
+]
+[2025-03-01 22:27:12,290: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
+[2025-03-01 22:27:16,075: INFO: preprocess: LLM response for query 'Berapa jumlah order_id unik dalam dataset ini?': Dataset yang Anda sebutkan tidak diberikan, jadi saya tidak dapat menghitung jumlah order_id unik di dalamnya. Mohon berikan dataset yang ingin Anda analisis agar saya dapat membantu Anda.]
+[2025-03-01 22:28:16,832: INFO: preprocess: Preprocessed data summary: Dataset ini memiliki kolom: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat. Total baris: 5862. Total order_id unik: 3414.]
