@@ -1,6 +1,6 @@
 from google.cloud import bigquery, storage
 from src.askdata import logger
-from vertexai.preview.generative_models import GenerativeModel
+from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 import vertexai
 import chromadb  # Untuk vector database di cloud
 import os
@@ -52,8 +52,14 @@ def integrate_llm(data_info: dict, query: str, bucket_name: str, vector_store_pa
         vertexai.init(project="datalabs-test-452308", location="us-central1")  # Ganti sesuai project dan region
 
         # Load model Gemini
-        model = GenerativeModel("gemini-pro")
-
+        model_dipake= "gemini-pro"
+        model = GenerativeModel(model_dipake)
+        generation_config = GenerationConfig(
+                    temperature=0.2,  # Lebih deterministic
+                    max_output_tokens=1024,  # Output panjang
+                    top_p=0.9,  # Pilih token terbaik
+                    top_k=40  # Pilih 40 token terbaik
+                )
         # Muat vector store dari Cloud Storage (sementara lokal buat test, nanti cloud)
         storage_client = storage.Client()
         vector_store_local = "vector_store_temp/"
@@ -78,14 +84,14 @@ def integrate_llm(data_info: dict, query: str, bucket_name: str, vector_store_pa
                         f"statistik: {data_info['details']['stats']}. "
                         f"Konteks relevan dari query: {retrieved_context}")
         prompt = f"{data_context}\nPertanyaan: {query}"
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, generation_config= generation_config)
         llm_response = response.text.strip() if response.text else "No response"
         
         # Pastikan nggak ada duplikat data_summary di jawaban
         if data_info['summary'] in llm_response:
             llm_response = llm_response.replace(data_info['summary'], "").strip()
         
-        logger.info(f"LLM response for query '{query}': {llm_response}")
+        logger.info(f"LLM ({model_dipake}) response for query '{query}': {llm_response}")
 
         # Hapus folder lokal sementara
         import shutil
@@ -101,7 +107,7 @@ if __name__ == "__main__":
     bq_table = "superstore_data"
     bucket_name = "technical-test-datalabs"
     vector_store_path = "vector_store/"
-    query = "Berapa jumlah order_id unik dalam dataset ini?"
+    query = "Total profit dari semua order di Spanyol (Spain) berapa?"
 
     # Preprocess data dan bikin vector store di cloud
     data_info = preprocess_data(bq_dataset, bq_table, bucket_name, vector_store_path)
