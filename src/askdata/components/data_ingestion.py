@@ -1,89 +1,161 @@
 from google.cloud import storage, bigquery
+from google.cloud import aiplatform
+from google.cloud.aiplatform_v1.types import index as gca_index  # For IndexDatapoint
 import pandas as pd
-from src.askdata import logger
-import os
-import chromadb  # Untuk vector database di cloud
-from tqdm import tqdm  # Untuk progress bar
 import io
+from tqdm import tqdm
+from typing import List
+import yaml
+from pathlib import Path
+import vertexai
 
-def ingest_data(bucket_name: str, source_blob_name: str, bq_dataset: str, bq_table: str, vector_store_path: str):
-    """Ingest data from Google Cloud Storage to BigQuery and create/update vector store in Cloud Storage for RAG using PersistentClient."""
+# Assuming these are custom modules in your project
+from src.askdata.components.embedding import create_embeddings  # Function to create embeddings
+from src.askdata import logger  # Logger setup
+
+def load_config(config_path: str = "config/config.yaml") -> dict:
+    """
+    Loads configuration from a YAML file.
+
+    Args:
+        config_path (str): Path to the config file relative to the project root.
+
+    Returns:
+        dict: Configuration dictionary.
+    """
+    config_file = Path(__file__).resolve().parents[3] / config_path
+    with open(config_file, "r") as f:
+        config = yaml.safe_load(f)
+    return config
+
+def ingest_data() -> pd.DataFrame:
+    """
+    Ingests data into BigQuery, creates embeddings, and updates the Vector Search index.
+
+    Returns:
+        pd.DataFrame: The ingested data.
+
+    Raises:
+        Exception: If any step in the ingestion process fails.
+    """
+    config = load_config()
+
+    # Initialize Vertex AI
+    vertexai.init(project=config["gcp"]["project_id"], location=config["gcp"]["location"])
+
     try:
-        # Inisialisasi clients
+        # --- 1. Load Data from GCS ---
         storage_client = storage.Client()
         bigquery_client = bigquery.Client()
-
-        # Download CSV dari Cloud Storage ke memori (nggak simpen lokal)
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(source_blob_name)
+        bucket = storage_client.bucket(config["gcp"]["bucket_name"])
+        blob = bucket.blob(config["gcp"]["source_blob_name"])
         data_bytes = blob.download_as_bytes()
-        data = pd.read_csv(io.StringIO(data_bytes.decode('utf-8')))
-        logger.info(f"Data CSV downloaded from {bucket_name}/{source_blob_name}")
-
-        # Simpan ke BigQuery (buat query cepat)
-        dataset_ref = bigquery_client.dataset(bq_dataset)
-        table_ref = dataset_ref.table(bq_table)
-        job_config = bigquery.LoadJobConfig(
-            write_disposition="WRITE_TRUNCATE",
-            create_disposition="CREATE_IF_NEEDED"
+        data = pd.read_csv(
+            io.StringIO(data_bytes.decode("utf-8")),
+            parse_dates=["order_date", "ship_date"]
         )
-        job = bigquery_client.load_table_from_dataframe(data, table_ref, job_config=job_config)
-        job.result()  # Tunggu job selesai
-        logger.info(f"Data loaded to BigQuery: {bq_dataset}.{bq_table}")
+        # Format dates as strings for BigQuery
+        data["order_date"] = data["order_date"].dt.strftime("%Y-%m-%d")
+        data["ship_date"] = data["ship_date"].dt.strftime("%Y-%m-%d")
+        logger.info(
+            f"Data CSV downloaded from {config['gcp']['bucket_name']}/{config['gcp']['source_blob_name']}"
+        )
 
-        # Buat vector store pake PersistentClient di lokal sementara, lalu upload ke Cloud Storage
-        vector_store_local = "vector_store_temp/"  # Path lokal sementara buat PersistentClient
-        os.makedirs(vector_store_local, exist_ok=True)
+        # --- 2. Define BigQuery Schema ---
+        schema = [
+            bigquery.SchemaField("order_id", "STRING"),
+            bigquery.SchemaField("order_date", "DATE"),
+            bigquery.SchemaField("ship_date", "DATE"),
+            bigquery.SchemaField("ship_mode", "STRING"),
+            bigquery.SchemaField("customer_name", "STRING"),
+            bigquery.SchemaField("segment", "STRING"),
+            bigquery.SchemaField("city", "STRING"),
+            bigquery.SchemaField("country", "STRING"),
+            bigquery.SchemaField("region", "STRING"),
+            bigquery.SchemaField("category", "STRING"),
+            bigquery.SchemaField("sub_category", "STRING"),
+            bigquery.SchemaField("gmv", "FLOAT"),
+            bigquery.SchemaField("profit", "FLOAT"),
+            bigquery.SchemaField("quantity", "INTEGER"),
+            bigquery.SchemaField("cost", "FLOAT"),
+            bigquery.SchemaField("total_gmv", "FLOAT"),
+            bigquery.SchemaField("total_cost", "FLOAT"),
+            bigquery.SchemaField("total_profit", "FLOAT"),
+            bigquery.SchemaField("lon", "FLOAT"),
+            bigquery.SchemaField("lat", "FLOAT"),
+        ]
 
-        # Buat PersistentClient Chroma dengan path lokal
-        chroma_client = chromadb.PersistentClient(path=vector_store_local)
-        # Pake get_or_create_collection untuk menghindari UniqueConstraintError
-        collection = chroma_client.get_or_create_collection("ask_data_collection")
+        # --- 3. Load Data into BigQuery ---
+        dataset_ref = bigquery_client.dataset(config["gcp"]["bq_dataset"])
+        table_ref = dataset_ref.table(config["gcp"]["bq_table"])
+        job_config = bigquery.LoadJobConfig(
+            schema=schema,
+            write_disposition="WRITE_TRUNCATE",
+            create_disposition="CREATE_IF_NEEDED",
+            source_format=bigquery.SourceFormat.CSV,
+            skip_leading_rows=1,
+            autodetect=False,
+        )
 
-        # Batch processing buat semua kolom
+        job = bigquery_client.load_table_from_dataframe(
+            data, table_ref, job_config=job_config
+        )
+        job.result()
+
+        if job.errors:
+            logger.error(f"BigQuery load job errors: {job.errors}")
+            raise Exception(f"BigQuery load job failed: {job.errors}")
+
+        logger.info(
+            f"Data loaded to BigQuery: {config['gcp']['bq_dataset']}.{config['gcp']['bq_table']}"
+        )
+
+        # --- 4. Create Embeddings and Update Vector Search Index ---
+        embeddings_data = []
         batch_size = 100
-        documents = []
-        ids = []
-        for idx, row in tqdm(data.iterrows(), total=len(data), desc="Creating/Updating vector store"):
-            text = ", ".join([f"{col}: {str(row[col])}" for col in data.columns])
-            documents.append(text)
-            ids.append(f"doc_{idx}")
-            if len(documents) >= batch_size:
-                collection.add(documents=documents, ids=ids)
-                documents = []
-                ids = []
 
-        if documents:
-            collection.add(documents=documents, ids=ids)
+        # Initialize the index outside the loop for efficiency
+        my_index = aiplatform.MatchingEngineIndex(config["gcp"]["index_name"])
 
-        # Vector store otomatis disimpan ke vector_store_temp/ karena PersistentClient
-        logger.info(f"Vector store created/updated and persisted in {vector_store_local}")
+        for idx, row in tqdm(data.iterrows(), total=len(data), desc="Creating embeddings"):
+            text = (
+                f"Category: {row['category']}, Sub-Category: {row['sub_category']}, "
+                f"Order ID: {row['order_id']}, Customer: {row['customer_name']}"
+            )
+            embeddings_data.append(text)
 
-        # Upload semua file di vector_store_temp/ ke Cloud Storage (handle subfolder)
-        for root, _, files in os.walk(vector_store_local):
-            for file_name in files:
-                local_path = os.path.join(root, file_name)
-                # Buat path di Cloud Storage sesuai struktur lokal
-                cloud_path = os.path.join(vector_store_path, os.path.relpath(local_path, vector_store_local))
-                blob = storage_client.bucket(bucket_name).blob(cloud_path)
-                blob.upload_from_filename(local_path)
-        logger.info(f"Vector store uploaded to {bucket_name}/{vector_store_path}")
+            if len(embeddings_data) >= batch_size:
+                embeddings = create_embeddings(embeddings_data, config["embeddings"]["model_name"])
+                ids = [str(i) for i in range(idx - len(embeddings_data) + 1, idx + 1)]
+                to_upsert = [
+                    gca_index.IndexDatapoint(
+                        datapoint_id=id,
+                        feature_vector=embedding
+                    )
+                    for id, embedding in zip(ids, embeddings)
+                ]
+                my_index.upsert_datapoints(to_upsert)
+                embeddings_data = []
 
-        # Hapus folder lokal sementara
-        import shutil
-        shutil.rmtree(vector_store_local)
+        # Process any remaining data
+        if embeddings_data:
+            embeddings = create_embeddings(embeddings_data, config["embeddings"]["model_name"])
+            ids = [str(i) for i in range(len(data) - len(embeddings_data), len(data))]
+            to_upsert = [
+                gca_index.IndexDatapoint(
+                    datapoint_id=id,
+                    feature_vector=embedding
+                )
+                for id, embedding in zip(ids, embeddings)
+            ]
+            my_index.upsert_datapoints(to_upsert)
 
-        print("DataFrame (preview):\n", data.head())  # Preview di console buat test cepat
+        logger.info("Embeddings created and Vector Search index updated.")
         return data
+
     except Exception as e:
         logger.error(f"Error in data ingestion: {str(e)}")
         raise
 
 if __name__ == "__main__":
-    bucket_name = "technical-test-datalabs"
-    source_blob_name = "ASK DATA - superstore_data.csv"
-    bq_dataset = "ask_data_dataset"
-    bq_table = "superstore_data"
-    vector_store_path = "vector_store/"  # Path di Cloud Storage
-
-    data = ingest_data(bucket_name, source_blob_name, bq_dataset, bq_table, vector_store_path)
+    ingest_data()
