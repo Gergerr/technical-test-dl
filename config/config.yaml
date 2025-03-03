@@ -1,14 +1,14 @@
 # config/config.yaml
 gcp:
-  project_id: 541368634993  # Corrected to match the output
+  project_id: "541368634993"  # Quote the project ID
   location: us-central1
   bucket_name: technical-test-datalabs
   source_blob_name: ASK DATA - superstore_data.csv
   bq_dataset: ask_data_dataset
   bq_table: superstore_data
-  index_name: projects/541368634993/locations/us-central1/indexes/7049677131160223744  # Corrected project ID
-  endpoint_name: projects/541368634993/locations/us-central1/indexEndpoints/267185723596079104  # Corrected project ID
-  deployed_index_id: datalabs_test_1740982900021  # Updated to match deployed ID
+  index_name: "projects/541368634993/locations/us-central1/indexes/7049677131160223744"  # Quote the whole string
+  endpoint_name: "projects/541368634993/locations/us-central1/indexEndpoints/267185723596079104"  # Quote the whole string
+  deployed_index_id: "datalabs_test_1740982900021"  # Quote this as well if it's a string
 
 llm:
   model_name: gemini-1.5-pro

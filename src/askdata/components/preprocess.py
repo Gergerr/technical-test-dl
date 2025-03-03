@@ -11,17 +11,16 @@ from google.oauth2 import service_account
 
 def load_config(config_path: str = "config/config.yaml") -> dict:
     try:
-        # Use Streamlit secrets if available (for deployment)
         if "gcp" in st.secrets:
-            config = {"gcp": dict(st.secrets["gcp"])}
-            # Load service account key from secrets if present
-            if "service_account_key" in config["gcp"]:
+            config = {}
+            for section in st.secrets:
+                config[section] = dict(st.secrets[section])
+            if "service_account_key" in config.get("gcp", {}):
                 credentials = service_account.Credentials.from_service_account_info(
                     json.loads(config["gcp"]["service_account_key"])
                 )
                 config["gcp"]["credentials"] = credentials
             return config
-        # Fallback to local config.yaml
         config_file = Path(__file__).resolve().parents[3] / config_path
         with open(config_file, "r") as f:
             return yaml.safe_load(f)
@@ -99,7 +98,7 @@ def integrate_llm(data_info: dict, query: str, return_df: bool = False) -> tuple
         logger.info(f"LLM response: {llm_response}")
 
         if return_df:
-            return llm_response, result_df
+            return llm_response, result_df, sql_query  # Return SQL query as well
         return llm_response
     except Exception as e:
         logger.error(f"Error in LLM integration: {str(e)}")
