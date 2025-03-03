@@ -13,9 +13,12 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
     try:
         # Use Streamlit secrets if available (for deployment)
         if "gcp" in st.secrets:
-            config = {"gcp": dict(st.secrets["gcp"])}
-            # Load service account key from secrets if present
-            if "service_account_key" in config["gcp"]:
+            config = {}
+            # Copy all sections from secrets
+            for section in st.secrets:
+                config[section] = dict(st.secrets[section])
+            # Handle service account key if present in gcp section
+            if "service_account_key" in config.get("gcp", {}):
                 credentials = service_account.Credentials.from_service_account_info(
                     json.loads(config["gcp"]["service_account_key"])
                 )
