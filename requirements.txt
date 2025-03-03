@@ -6,3 +6,4 @@ google-cloud-bigquery-storage  # Optional, for performance
 google-cloud-aiplatform
 vertexai
 pyyaml
+db-dtypes
