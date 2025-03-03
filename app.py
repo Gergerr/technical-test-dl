@@ -7,29 +7,19 @@ from src.askdata.components.preprocess import preprocess_data, integrate_llm, lo
 # Streamlit app configuration
 st.set_page_config(page_title="Superstore Query App", page_icon="📊", layout="wide")
 
-# Title and description (above input)
+# Title and description
 st.title("Superstore Query App")
 st.markdown("Ask any question about the Superstore dataset, and get an answer with a visualization!")
 
-# Input query (at the top, spanning both columns)
+# Input query
 query = st.text_input("Enter your question:", placeholder="e.g., What is the total profit for all orders in Spain?")
-st.markdown("""
-    <style>
-        div.stButton > button {
-            background-color: red;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 8px 16px;
-        }
-    </style>
-""", unsafe_allow_html=True)
+
 # Create two columns for layout
-col1, col2 = st.columns([1, 1])  # Equal width for left (Visualization) and right (Table Preview)
+col1, col2 = st.columns([1, 1])
 
 # Left column: Visualization and SQL Query
 with col1:
-
+    st.subheader("Visualization")
     if st.button("Get Answer"):
         if query:
             with st.spinner("Processing your question..."):
@@ -67,7 +57,7 @@ with col1:
                     else:
                         st.write("No data to visualize.")
 
-                    # Display SQL Query below Visualization
+                    # Display SQL Query
                     st.subheader("SQL Query")
                     st.code(sql_query, language="sql")
 
@@ -76,16 +66,19 @@ with col1:
         else:
             st.warning("Please enter a question!")
 
-# Right column: Table Preview
+# Right column: Table Preview (moved inside query logic or keep static with error handling)
 with col2:
-    st.subheader("Table Preview")
-    config = load_config()
-    bq_client = bigquery.Client(credentials=config["gcp"].get("credentials")) if config["gcp"].get("credentials") else bigquery.Client()
-    preview_query = f"SELECT * FROM `{config['gcp']['bq_dataset']}.{config['gcp']['bq_table']}` LIMIT 5"
-    preview_df = bq_client.query(preview_query).to_dataframe()
-    st.dataframe(preview_df)
+    try:
+        st.subheader("Table Preview")
+        config = load_config()
+        bq_client = bigquery.Client(credentials=config["gcp"].get("credentials")) if config["gcp"].get("credentials") else bigquery.Client()
+        preview_query = f"SELECT * FROM `{config['gcp']['bq_dataset']}.{config['gcp']['bq_table']}` LIMIT 5"
+        preview_df = bq_client.query(preview_query).to_dataframe()
+        st.dataframe(preview_df)
+    except Exception as e:
+        st.error(f"Could not load table preview: {str(e)}")
 
-# Sample questions (below everything, optional)
+# Sample questions
 with st.expander("Sample Questions"):
     st.write("""
     - What is the total profit for all orders in Spain?
