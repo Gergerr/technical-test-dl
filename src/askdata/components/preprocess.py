@@ -5,16 +5,34 @@ import yaml
 from pathlib import Path
 from src.askdata import logger
 import re
+import streamlit as st
+import json
+from google.oauth2 import service_account
 
 def load_config(config_path: str = "config/config.yaml") -> dict:
-    config_file = Path(__file__).resolve().parents[3] / config_path
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
-    return config
+    try:
+        # Use Streamlit secrets if available (for deployment)
+        if "gcp" in st.secrets:
+            config = {"gcp": dict(st.secrets["gcp"])}
+            # Load service account key from secrets if present
+            if "service_account_key" in config["gcp"]:
+                credentials = service_account.Credentials.from_service_account_info(
+                    json.loads(config["gcp"]["service_account_key"])
+                )
+                config["gcp"]["credentials"] = credentials
+            return config
+        # Fallback to local config.yaml
+        config_file = Path(__file__).resolve().parents[3] / config_path
+        with open(config_file, "r") as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        logger.error(f"Error loading config: {str(e)}")
+        raise
 
 def get_table_schema() -> list:
     config = load_config()
-    bq_client = bigquery.Client()
+    credentials = config["gcp"].get("credentials")
+    bq_client = bigquery.Client(credentials=credentials) if credentials else bigquery.Client()
     table_ref = f"{config['gcp']['bq_dataset']}.{config['gcp']['bq_table']}"
     table = bq_client.get_table(table_ref)
     return [field.name for field in table.schema]
@@ -35,12 +53,12 @@ def preprocess_data() -> dict:
 
 def integrate_llm(data_info: dict, query: str, return_df: bool = False) -> tuple:
     config = load_config()
-    vertexai.init(project=config["gcp"]["project_id"], location=config["gcp"]["location"])
+    credentials = config["gcp"].get("credentials")
+    vertexai.init(project=config["gcp"]["project_id"], location=config["gcp"]["location"], credentials=credentials)
     try:
         model = GenerativeModel(config["llm"]["model_name"])
         generation_config = GenerationConfig(**config["llm"]["generation_config"])
 
-        # Improved prompt with BigQuery-specific instructions
         prompt = (
             f"{data_info['summary']}\n"
             f"User question: {query}\n"
@@ -54,29 +72,14 @@ def integrate_llm(data_info: dict, query: str, return_df: bool = False) -> tuple
         )
         response = model.generate_content(prompt, generation_config=generation_config)
         sql_query_raw = response.text.strip()
-
-        # Clean markdown and fix STRFTIME
         sql_query = re.sub(r'```sql|```', '', sql_query_raw).strip()
-        # Replace STRFTIME with BigQuery equivalents (basic fallback)
-        sql_query = re.sub(
-            r"STRFTIME\('%Y', (\w+)\)",
-            r"EXTRACT(YEAR FROM \1)",
-            sql_query,
-            flags=re.IGNORECASE
-        )
-        sql_query = re.sub(
-            r"STRFTIME\('%Y-%m', (\w+)\)",
-            r"FORMAT_DATE('%Y-%m', \1)",
-            sql_query,
-            flags=re.IGNORECASE
-        )
+        sql_query = re.sub(r"STRFTIME\('%Y', (\w+)\)", r"EXTRACT(YEAR FROM \1)", sql_query, flags=re.IGNORECASE)
+        sql_query = re.sub(r"STRFTIME\('%Y-%m', (\w+)\)", r"FORMAT_DATE('%Y-%m', \1)", sql_query, flags=re.IGNORECASE)
         logger.info(f"Generated SQL: {sql_query}")
 
-        # Execute the SQL query
-        bq_client = bigquery.Client()
+        bq_client = bigquery.Client(credentials=credentials) if credentials else bigquery.Client()
         result_df = bq_client.query(sql_query).to_dataframe()
 
-        # Format the result
         if not result_df.empty:
             if len(result_df.columns) == 1 and len(result_df) == 1:
                 answer = f"The answer is {result_df.iloc[0, 0]}."
