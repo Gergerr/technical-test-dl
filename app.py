@@ -1,64 +1,91 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from src.askdata.components.preprocess import preprocess_data, integrate_llm
+from google.cloud import bigquery
+from src.askdata.components.preprocess import preprocess_data, integrate_llm, load_config
 
 # Streamlit app configuration
-st.set_page_config(page_title="Ask Data - Superstore", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Superstore Query App", page_icon="📊", layout="wide")
 
-# Title and description
-st.title("Ask Data - Superstore")
-st.markdown("Ask any question about the Superstore dataset, and get an answer with a visualization (if exists)!")
+# Title and description (above input)
+st.title("Superstore Query App")
+st.markdown("Ask any question about the Superstore dataset, and get an answer with a visualization!")
 
-# Input query
+# Input query (at the top, spanning both columns)
 query = st.text_input("Enter your question:", placeholder="e.g., What is the total profit for all orders in Spain?")
+st.markdown("""
+    <style>
+        div.stButton > button {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 8px 16px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+# Create two columns for layout
+col1, col2 = st.columns([1, 1])  # Equal width for left (Visualization) and right (Table Preview)
 
-# Process query and display result
-if st.button("Get Answer"):
-    if query:
-        with st.spinner("Processing your question..."):
-            try:
-                # Get table info and answer
-                data_info = preprocess_data()
-                response, result_df = integrate_llm(data_info, query, return_df=True)
-                
-                # Escape dollar signs to prevent LaTeX rendering
-                response = response.replace("$", r"\$")
-                
-                # Display the text answer
-                st.success("Answer:")
-                st.write(response)  # Markdown with escaped $, or use st.text(response) for plain text
-                
-                # Visualization logic
-                if not result_df.empty:
-                    st.subheader("Visualization")
-                    if len(result_df.columns) == 1 and len(result_df) == 1:
-                        st.write("Single value queries don’t have a visualization, here’s the result:")
-                        st.write(result_df.iloc[0, 0])
-                    elif len(result_df) > 1:
-                        if len(result_df.columns) == 2:
-                            x_col = result_df.columns[0]
-                            y_col = result_df.columns[1]
-                            if "profit" in y_col.lower() or "gmv" in y_col.lower() or "quantity" in y_col.lower():
-                                fig = px.bar(result_df, x=x_col, y=y_col, title=f"{y_col.capitalize()} by {x_col.capitalize()}")
-                            else:
-                                fig = px.pie(result_df, names=x_col, values=y_col, title=f"{y_col.capitalize()} Distribution")
-                            st.plotly_chart(fig, use_container_width=True)
-                        elif len(result_df.columns) > 2:
-                            fig = px.bar(result_df, x=result_df.columns[0], y=result_df.columns[1], 
-                                        title=f"{result_df.columns[1].capitalize()} by {result_df.columns[0].capitalize()}")
-                            st.plotly_chart(fig, use_container_width=True)
+# Left column: Visualization and SQL Query
+with col1:
+
+    if st.button("Get Answer"):
+        if query:
+            with st.spinner("Processing your question..."):
+                try:
+                    data_info = preprocess_data()
+                    response, result_df, sql_query = integrate_llm(data_info, query, return_df=True)
+                    
+                    # Escape dollar signs
+                    response = response.replace("$", r"\$")
+                    
+                    # Display the text answer
+                    st.subheader("Answer")
+                    st.write(response)
+
+                    # Visualization logic
+                    if not result_df.empty:
+                        if len(result_df.columns) == 1 and len(result_df) == 1:
+                            st.write("Single value queries don’t have a visualization, here’s the result:")
+                            st.write(result_df.iloc[0, 0])
+                        elif len(result_df) > 1:
+                            if len(result_df.columns) == 2:
+                                x_col = result_df.columns[0]
+                                y_col = result_df.columns[1]
+                                if "profit" in y_col.lower() or "gmv" in y_col.lower() or "quantity" in y_col.lower():
+                                    fig = px.bar(result_df, x=x_col, y=y_col, title=f"{y_col.capitalize()} by {x_col.capitalize()}")
+                                else:
+                                    fig = px.pie(result_df, names=x_col, values=y_col, title=f"{y_col.capitalize()} Distribution")
+                                st.plotly_chart(fig, use_container_width=True)
+                            elif len(result_df.columns) > 2:
+                                fig = px.bar(result_df, x=result_df.columns[0], y=result_df.columns[1], 
+                                            title=f"{result_df.columns[1].capitalize()} by {result_df.columns[0].capitalize()}")
+                                st.plotly_chart(fig, use_container_width=True)
+                        else:
+                            st.write("No visualization available for this result.")
                     else:
-                        st.write("No visualization available for this result.")
-                else:
-                    st.write("No data to visualize.")
+                        st.write("No data to visualize.")
 
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-    else:
-        st.warning("Please enter a question!")
+                    # Display SQL Query below Visualization
+                    st.subheader("SQL Query")
+                    st.code(sql_query, language="sql")
 
-# Sample questions
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+        else:
+            st.warning("Please enter a question!")
+
+# Right column: Table Preview
+with col2:
+    st.subheader("Table Preview")
+    config = load_config()
+    bq_client = bigquery.Client(credentials=config["gcp"].get("credentials")) if config["gcp"].get("credentials") else bigquery.Client()
+    preview_query = f"SELECT * FROM `{config['gcp']['bq_dataset']}.{config['gcp']['bq_table']}` LIMIT 5"
+    preview_df = bq_client.query(preview_query).to_dataframe()
+    st.dataframe(preview_df)
+
+# Sample questions (below everything, optional)
 with st.expander("Sample Questions"):
     st.write("""
     - What is the total profit for all orders in Spain?

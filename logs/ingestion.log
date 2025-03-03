@@ -12561,3 +12561,32 @@ ORDER BY
 [2025-03-03 21:01:01,643: INFO: preprocess: Data summary: Dataset table: ask_data_dataset.superstore_data. Columns: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat.]
 [2025-03-03 21:01:03,990: INFO: preprocess: Generated SQL: SELECT EXTRACT(YEAR FROM order_date) AS year, AVG(total_profit) AS avg_profit_per_order FROM ask_data_dataset.superstore_data GROUP BY year]
 [2025-03-03 21:01:07,676: INFO: preprocess: LLM response: The average profit per order fluctuated between 2011 and 2014.  The highest average profit was $448.43 per order in 2013, while the lowest was $391.62 in 2012.]
+[2025-03-03 22:14:15,672: ERROR: preprocess: Error loading config: No secrets found. Valid paths for a secrets.toml file or secret directories are: /Users/geraldo/.streamlit/secrets.toml, /Users/geraldo/Documents/Code/MLOps/datalabs-techtest/askdata/.streamlit/secrets.toml]
+[2025-03-03 22:16:11,955: INFO: preprocess: Data summary: Dataset table: ask_data_dataset.superstore_data. Columns: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat.]
+[2025-03-03 22:16:14,400: INFO: preprocess: Generated SQL: SELECT
+    sum(total_profit)
+  FROM
+    `ask_data_dataset.superstore_data` AS t
+  WHERE t.country = 'Spain']
+[2025-03-03 22:16:17,164: INFO: preprocess: LLM response: The total profit for all orders in Spain is $305,302.0.]
+[2025-03-03 22:20:26,938: INFO: preprocess: Data summary: Dataset table: ask_data_dataset.superstore_data. Columns: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat.]
+[2025-03-03 22:20:29,356: INFO: preprocess: Generated SQL: SELECT
+    sum(total_profit)
+  FROM
+    `ask_data_dataset.superstore_data` AS t
+  WHERE t.country = 'Spain']
+[2025-03-03 22:20:31,956: INFO: preprocess: LLM response: The total profit for all orders in Spain is $305,302.0.]
+[2025-03-03 22:40:33,321: INFO: preprocess: Data summary: Dataset table: ask_data_dataset.superstore_data. Columns: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat.]
+[2025-03-03 22:40:35,684: INFO: preprocess: Generated SQL: SELECT
+    sum(total_profit)
+  FROM
+    `ask_data_dataset.superstore_data` AS t
+  WHERE t.country = 'Spain']
+[2025-03-03 22:40:38,272: INFO: preprocess: LLM response: The total profit for all orders in Spain is $305,302.0.]
+[2025-03-03 22:58:56,585: INFO: preprocess: Data summary: Dataset table: ask_data_dataset.superstore_data. Columns: order_id, gmv, profit, quantity, category, sub_category, cost, total_gmv, total_cost, total_profit, order_date, customer_name, city, country, region, segment, ship_date, ship_mode, lon, lat.]
+[2025-03-03 22:58:58,187: INFO: preprocess: Generated SQL: SELECT
+    sum(total_profit)
+  FROM
+    `ask_data_dataset.superstore_data` AS t
+  WHERE t.country = 'Spain']
+[2025-03-03 22:59:00,705: INFO: preprocess: LLM response: The total profit for all orders in Spain is $305,302.0.]
