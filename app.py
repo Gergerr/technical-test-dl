@@ -91,6 +91,7 @@ with col2:
 # Sample questions
 with st.expander("Sample Questions"):
     st.write("""
+    **Non Visualization Based Questions:**
     - What is the total profit for all orders in Spain?
     - How many orders were placed in France?
     - What’s the average quantity ordered in Germany?
@@ -101,4 +102,16 @@ with st.expander("Sample Questions"):
     - What’s the total quantity sold for Office Supplies in Spain?
     - Which sub-category had the lowest profit in France?
     - How many unique customers ordered in the Consumer segment?
+    
+    **Visualization-Based Questions:**
+    - What is the total profit trend over the years?
+    - What is the distribution of order quantity?
+    - What is the total GMV for each category?
+    - Which cities contribute the most to total profit?
+    - What is the proportion of each category in terms of profit?
+    - What is the average profit per order per year?
+    - What is the total profit for each sub-category?
+    - What is the profit distribution across different shipping modes?
+    - What is the correlation between GMV and Profit?
+    - Which months have the highest number of orders?
     """)
