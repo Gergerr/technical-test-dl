@@ -3,8 +3,5 @@ google-cloud-aiplatform
 pandas
 matplotlib
 streamlit
-gradio
-dvc
-mlflow
-chromadb
 db-dtypes
+plotly
