@@ -13,13 +13,23 @@ st.markdown("Ask any question about the Superstore dataset, and get an answer wi
 
 # Input query
 query = st.text_input("Enter your question:", placeholder="e.g., What is the total profit for all orders in Spain?")
+st.markdown("""
+    <style>
+        div.stButton > button {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 8px 16px;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # Create two columns for layout
 col1, col2 = st.columns([1, 1])
 
 # Left column: Visualization and SQL Query
 with col1:
-    st.subheader("Visualization")
     if st.button("Get Answer"):
         if query:
             with st.spinner("Processing your question..."):
